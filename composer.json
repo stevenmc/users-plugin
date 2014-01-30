@@ -1,7 +1,7 @@
 {
-    "name": "cakedc/users",
+    "name": "stevenmc/users-plugin",
     "type": "cakephp-plugin",
-    "description": "Users Plugin for CakePHP",
+    "description": "Users Plugin for CakePHP - modified from CakeDC",
     "keywords": ["cakephp","users","auth"],
     "homepage": "http://cakedc.com",
     "license": "MIT",
