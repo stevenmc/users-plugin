@@ -1,9 +1,9 @@
 <?php
 App::uses('UsersAppController', 'Users.Controller');
 
-class UsersController extends UsersAppController {
+class PagesController extends AppController {
 
-    public $name = 'Users';
+    public $name = 'Pages';
 
 /**
  * Helpers
@@ -33,8 +33,8 @@ class UsersController extends UsersAppController {
  * @var array
  */
     public $_publicActions = array(
-        // 'reset', 'verify', 'logout', 'view', 'reset_password', 'login',
         'admin_login', 'admin_reset', 'admin_verify', 'admin_logout', 'admin_reset_password',
+	'admin_facebook_login', 'facebook_login',
         'moderator_login', 'moderator_reset', 'moderator_verify', 'moderator_logout', 'moderator_reset_password',
     );
 
@@ -115,6 +115,13 @@ class UsersController extends UsersAppController {
         $user = $this->{$this->modelClass}->read(null, $this->Auth->user('id'));
         $this->set('user', $user);
     }
+
+public function facebook_login(){
+	return $this->redirect('/admin');
+}
+public function admin_facebook_login(){
+	return $this->redirect('/admin');
+}
 
 /**
  * Shows a users profile
@@ -283,10 +290,6 @@ class UsersController extends UsersAppController {
         $this->logout();
     }
 
-    public function moderator_reset_password($token = null, $user = null) {
-        $this->reset_password($token, $user);
-    }
-
 
 
 /**
@@ -387,7 +390,7 @@ class UsersController extends UsersAppController {
 
         if ($this->{$this->modelClass}->save($data, array('validate' => false))) {
             $this->_sendNewPassword($email, $data);
-            return $this->flashMessage(__d('users', 'Your password was sent to your registered email account'), 'alert-info', $this->Auth->loginAction);
+            return $this->flashMessage(__d('users', 'Your password was sent to your registered email account'), 'alert-info', '/admin');
         }
 
         $this->flashMessage(__d('users', 'There was an error verifying your account. Please check the email you were sent, and retry the verification link.'), 'alert-error', '/');
@@ -500,7 +503,6 @@ class UsersController extends UsersAppController {
         );
 
         $options = array_merge($defaults, $options);
-
         if (!empty($this->request->data)) {
             $user = $this->{$this->modelClass}->passwordReset($this->request->data);
 
@@ -517,7 +519,6 @@ class UsersController extends UsersAppController {
                         'user' => $this->User->data,
                         'token' => $this->User->data[$this->modelClass]['password_token']))
                     ->send();
-
                 if ($admin) {
                     $this->flashMessage(sprintf(
                         __d('users', '%s has been sent an email with instructions to reset their password.'),
@@ -530,7 +531,6 @@ class UsersController extends UsersAppController {
                 $this->flashMessage(__d('users', 'No user was found with that email.'), 'alert-error');
             }
         }
-
         if ($admin) {
             return $this->render('admin_request_password_change');
         }
@@ -589,3 +589,4 @@ class UsersController extends UsersAppController {
         }
     }
 }
+

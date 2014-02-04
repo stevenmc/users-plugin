@@ -36,7 +36,28 @@ The plugin itself is already capable of:
 
 The default password reset process requires the user to enter his email address, an email is sent to the user with a link and a token. When the user accesses the URL with the token he can enter a new password.
 
-### Using the "remember me" cookie ###
+### Using the "remember me" functionality ###
+
+To use the "remember me" checkbox which sets a cookie on the login page you will need to add the RememberMe component to the AppController or the controllers you want to auto-login the user again based on the cookie.
+
+```php
+public $components = array(
+	'Users.RememberMe'
+);
+```
+
+If you are using another user model than 'User' you'll have to configure it:
+
+	public $components = array(
+		'Users.RememberMe' => array(
+			'userModel' => 'AppUser')
+	);
+
+And add this line
+
+```php
+$this->RememberMe->restoreLoginFromCookie();
+```
 
 To use the "remember me" checkbox which sets a cookie on the login page you will need to put this code or method call in your AppController::beforeFilter() method.
 
