@@ -11,7 +11,7 @@
 
 App::uses('Security', 'Utility');
 App::uses('UsersAppModel', 'Users.Model');
-
+App::uses('BcryptFormAuthenticate', 'Controller/Component/Auth');
 /**
  * Users Plugin User Model
  *
@@ -35,16 +35,28 @@ class User extends UsersAppModel {
 	public $displayField = 'username';
 
 /**
- * Attach Slugged behavior
+ * hasMany associations
+ *
+ * @var array
  */
-	public $actsAs = array(
-		'Sluggable' => array(
-			'label' => 'username'
+	public $hasOne = array(
+		'UserDetail' => array(
+			'className' => 'Users.UserDetail',
+			'foreign_key' => 'user_id'
 		)
 	);
 
 /**
- * Validation domain for translations
+ * Attach Sluggable behavior
+ */
+	public $actsAs = array(
+		'Sluggable' => array(
+            'label' => 'username'
+        )
+    );
+
+/**
+ * Validation domain for translations 
  *
  * @var string
  */
@@ -59,7 +71,7 @@ class User extends UsersAppModel {
 		'username' => array(
 			'required' => array(
 				'rule' => array('notEmpty'),
-				'required' => 'create',
+				'required' => 'create', 
 				'allowEmpty' => false,
 				'message' => 'Please enter a username.'
 			),
@@ -124,30 +136,27 @@ class User extends UsersAppModel {
 			'new_password' => $this->validate['password'],
 			'confirm_password' => array(
 				'required' => array(
-					'rule' => array('compareFields', 'new_password', 'confirm_password'),
-					'required' => true,
+					'rule' => array('compareFields', 'new_password', 'confirm_password'), 
+					'required' => true, 
 					'message' => __d('users', 'The passwords are not equal.')
 				)
 			),
 			'old_password' => array(
 				'to_short' => array(
-					'rule' => 'validateOldPassword',
-					'required' => true,
+					'rule' => 'validateOldPassword', 
+					'required' => true, 
 					'message' => __d('users', 'Invalid password.')
 				)
 			)
 		);
 	}
 
-	public function beforeSave($options = array()) {
-		if (isset($this->data['User']['password'])) {
-			$this->data['User']['password'] = Security::hash($this->data['User']['password'], 'blowfish');
-		}
-		if (isset($this->data['User']['email'])) {
-			$this->data['User']['email'] = strtolower($this->data['User']['email']);
-		}
-		return true;
-	}
+	public function beforeSave() {
+        if (isset($this->data['User']['password'])) {
+            $this->data['User']['password'] = BcryptFormAuthenticate::hash($this->data['User']['password']);
+        }
+        return true;
+    }
 
 /**
  * Custom validation method to ensure that the two entered passwords match
@@ -253,8 +262,9 @@ class User extends UsersAppModel {
 				$data[$this->alias]['role'] = $match[$this->alias]['role'];
 
 				if ($reset === true) {
+					App::uses('Security', 'Utility');
 					$newPassword = $this->generatePassword();
-					$data[$this->alias]['password'] = Security::hash($newPassword, 'blowfish');
+					$data[$this->alias]['password'] = BcryptFormAuthenticate::hash($newPassword);
 					$data[$this->alias]['new_password'] = $newPassword;
 					$data[$this->alias]['password_token'] = null;
 				}
@@ -318,7 +328,7 @@ class User extends UsersAppModel {
 
 /**
  * Checks the token for a password change
- *
+ * 
  * @param string $token Token
  * @return mixed False or user data as array
  */
@@ -339,7 +349,7 @@ class User extends UsersAppModel {
 
 /**
  * Resets the password
- *
+ * 
  * @param array $postData Post data from controller
  * @return boolean True on success
  */
@@ -351,7 +361,7 @@ class User extends UsersAppModel {
 			'new_password' => $tmp['password'],
 			'confirm_password' => array(
 				'required' => array(
-					'rule' => array('compareFields', 'new_password', 'confirm_password'),
+					'rule' => array('compareFields', 'new_password', 'confirm_password'), 
 					'message' => __d('users', 'The passwords are not equal.')
 				)
 			)
@@ -359,7 +369,7 @@ class User extends UsersAppModel {
 
 		$this->set($postData);
 		if ($this->validates()) {
-			$this->data[$this->alias]['password'] = Security::hash($this->data[$this->alias]['new_password'], 'blowfish');
+			$this->data[$this->alias]['password'] = BcryptFormAuthenticate::hash($this->data[$this->alias]['new_password']);
 			$this->data[$this->alias]['password_token'] = null;
 			$result = $this->save($this->data, array(
 				'validate' => false,
@@ -382,7 +392,7 @@ class User extends UsersAppModel {
 
 		$this->set($postData);
 		if ($this->validates()) {
-			$this->data[$this->alias]['password'] = Security::hash($this->data[$this->alias]['new_password'], 'blowfish');
+			$this->data[$this->alias]['password'] = BcryptFormAuthenticate::hash($this->data[$this->alias]['new_password']);
 			$this->save($postData, array(
 				'validate' => false,
 				'callbacks' => false
@@ -395,7 +405,7 @@ class User extends UsersAppModel {
 /**
  * Validation method to check the old password
  *
- * @param array $password
+ * @param array $password 
  * @return boolean True on success
  */
 	public function validateOldPassword($password) {
@@ -406,7 +416,7 @@ class User extends UsersAppModel {
 		}
 
 		$current_password = $this->field('password', array($this->alias . '.id' => $this->data[$this->alias]['id']));
-		return $current_password === Security::hash($password['old_password'], 'blowfish', $current_password);
+		return BcryptFormAuthenticate::check($password['old_password'], $current_password);
 	}
 
 /**
@@ -420,7 +430,7 @@ class User extends UsersAppModel {
 		if (is_array($field1)) {
 			$field1 = key($field1);
 		}
-		if (isset($this->data[$this->alias][$field1]) && isset($this->data[$this->alias][$field2]) &&
+		if (isset($this->data[$this->alias][$field1]) && isset($this->data[$this->alias][$field2]) && 
 			$this->data[$this->alias][$field1] == $this->data[$this->alias][$field2]) {
 			return true;
 		}
@@ -435,6 +445,7 @@ class User extends UsersAppModel {
  */
 	public function view($slug = null) {
 		$user = $this->find('first', array(
+			'contain' => array('UserDetail'),
 			'conditions' => array(
 				'OR' => array(
 					$this->alias . '.slug' => $slug,
@@ -615,7 +626,7 @@ class User extends UsersAppModel {
 
 /**
  * Adds a new user
- *
+ * 
  * @param array post data, should be Controller->data
  * @return boolean True if the data was saved successfully.
  */
@@ -643,6 +654,7 @@ class User extends UsersAppModel {
  */
 	public function edit($userId = null, $postData = null) {
 		$user = $this->find('first', array(
+			'contain' => array('UserDetail'),
 			'conditions' => array(
 				$this->alias . '.' . $this->primaryKey => $userId
 			)
@@ -661,7 +673,6 @@ class User extends UsersAppModel {
 				return $postData;
 			}
 		}
-		return $user;
 	}
 
 /**

@@ -40,7 +40,7 @@ class CreateTask extends AppShell {
 
             $password = '';
             while ($password == '') {
-                $password = $this->in(__d('user_console', 'Password: (min 6 chars)'));
+                $password = $this->in(__d('user_console', 'Password:'));
             }
 
             $admin = '';
@@ -48,19 +48,16 @@ class CreateTask extends AppShell {
                 $admin = $this->in(__d('user_console', 'Admin?:'), null, 'n');
                 if (in_array(strtolower($admin), array('y', 'yes'))) {
                     $admin = 1;
-                    $role = 'admin';
                 } else {
                     $admin = 0;
-                    $role = 'default';
                 }
             }
-
+    
             $data['User'] = array(
                 'username' => $username,
                 'email' => $email,
                 'password' => $password,
                 'active' => 1,
-                'role' => $role,
                 'email_verified' => 1,
                 'is_admin' => $admin,
             );

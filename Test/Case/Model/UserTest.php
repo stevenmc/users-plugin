@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright 2010 - 2011, Cake Development Corporation (http://cakedc.com)
  *
@@ -8,6 +8,7 @@
  * @copyright Copyright 2010 - 2011, Cake Development Corporation (http://cakedc.com)
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
+App::uses('BcryptFormAuthenticate', 'Controller/Component/Auth');
 
 /**
  * UserTestCase
@@ -37,7 +38,8 @@ class UserTestCase extends CakeTestCase {
  * @var array
  */
     public $fixtures = array(
-        'plugin.users.user'
+        'plugin.users.user',
+        'plugin.users.user_detail'
     );
 
 /**
@@ -58,10 +60,10 @@ class UserTestCase extends CakeTestCase {
     public function tearDown() {
         parent::tearDown();
         unset($this->User);
-        ClassRegistry::flush();
+        ClassRegistry::flush(); 
     }
 /**
- *
+ * 
  *
  * @return void
  */
@@ -283,7 +285,7 @@ class UserTestCase extends CakeTestCase {
         $this->assertTrue($result);
         $result = $this->User->data;
         $this->assertEqual($result['User']['active'], 1);
-        $this->assertTrue($result['User']['password'] === Security::hash('password', 'blowfish', $result['User']['password']));
+        $this->assertTrue(BcryptFormAuthenticate::check('password', $result['User']['password']));
         $this->assertTrue(is_string($result['User']['email_token']));
 
         $result = $this->User->findById($this->User->id);
@@ -319,13 +321,13 @@ class UserTestCase extends CakeTestCase {
         ));
         $result = $this->User->changePassword($postData);
         $this->assertTrue($result);
-        $result2 = $this->User->find('first', array(
+        $ressult = $this->User->find('first', array(
             'recursive' => -1,
             'conditions' => array(
                 'User.id' => 1
             )
         ));
-        $this->assertTrue($result2['User']['password'] === Security::hash('testtest', 'blowfish', $result2['User']['password']));
+        $this->assertTrue(BcryptFormAuthenticate::check('testtest', $ressult['User']['password']));
     }
 
 /**
@@ -348,7 +350,7 @@ class UserTestCase extends CakeTestCase {
     }
 
 /**
- * Test resending of the email authentication
+ * Test resending of the email authentication 
  *
  * @return void
  */
@@ -376,7 +378,7 @@ class UserTestCase extends CakeTestCase {
     }
 
 /**
- * Test resending of the email authentication
+ * Test resending of the email authentication 
  *
  * @return void
  */
@@ -434,10 +436,9 @@ class UserTestCase extends CakeTestCase {
 
         $result = $this->User->read(null, 1);
         $this->assertEqual($result['User']['username'], $data['User']['username']);
-        $this->assertNotEqual($result['User']['email'], $data['User']['email']);
-        $this->assertEqual($result['User']['email'], strtolower($data['User']['email']));
+        $this->assertEqual($result['User']['email'], $data['User']['email']);
     }
-
+    
 /**
  * testEditException
  *

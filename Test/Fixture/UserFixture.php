@@ -8,6 +8,7 @@
  * @copyright Copyright 2010 - 2011, Cake Development Corporation (http://cakedc.com)
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
+App::uses('BcryptFormAuthenticate', 'Controller/Component/Auth');
 App::uses('Security', 'Utility');
 
 /**
@@ -78,7 +79,7 @@ class UserFixture extends CakeTestFixture {
 			'last_action'  => '2008-03-25 02:45:46',
 			'last_login' => '2008-03-25 02:45:46',
 			'is_admin' => 1,
-			'role' => 'admin',
+			'role' => 'admin',			
 			'created'  => '2008-03-25 02:45:46',
 			'modified'  => '2008-03-25 02:45:46'
 		),
@@ -96,7 +97,7 @@ class UserFixture extends CakeTestFixture {
 			'last_action'  => '2008-03-25 02:45:46',
 			'last_login' => '2008-03-25 02:45:46',
 			'is_admin' => 0,
-			'role' => 'user',
+			'role' => 'user',			
 			'created'  => '2008-03-25 02:45:46',
 			'modified'  => '2008-03-25 02:45:46'
 		),
@@ -114,7 +115,7 @@ class UserFixture extends CakeTestFixture {
 			'last_action'  => '2008-03-25 02:45:46',
 			'last_login' => '2008-03-25 02:45:46',
 			'is_admin' => 0,
-			'role' => 'user',
+			'role' => 'user',			
 			'created'  => '2008-03-25 02:45:46',
 			'modified'  => '2008-03-25 02:45:46'
 		),
@@ -181,7 +182,7 @@ class UserFixture extends CakeTestFixture {
 	public function __construct() {
 		parent::__construct();
 		foreach ($this->records as &$record) {
-			$record['password'] = Security::hash($record['password'], 'blowfish');
+			$record['password'] = BcryptFormAuthenticate::hash($record['password'], null, true);
 		}
 	}
 
